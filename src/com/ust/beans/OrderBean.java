@@ -1,7 +1,7 @@
 package com.ust.beans;
 
 public class OrderBean {
-	String orderId,userId,orderDate,storeId,orderStatus,street,city,pincode,mobileNo;
+	String orderId,userId,orderDate,storeId,orderStatus,street,city,pincode,mobileNo,state;
 	int cartId;
 	double totalPrice;
 	
@@ -9,8 +9,9 @@ public class OrderBean {
 		super();
 		// TODO Auto-generated constructor stub
 	}
+
 	public OrderBean(String orderId, String userId, String orderDate, String storeId, String orderStatus, String street,
-			String city, String pincode, String mobileNo, int cartId, double totalPrice) {
+			String city, String pincode, String mobileNo, String state, int cartId, double totalPrice) {
 		super();
 		this.orderId = orderId;
 		this.userId = userId;
@@ -21,9 +22,19 @@ public class OrderBean {
 		this.city = city;
 		this.pincode = pincode;
 		this.mobileNo = mobileNo;
+		this.state = state;
 		this.cartId = cartId;
 		this.totalPrice = totalPrice;
 	}
+
+	public String getState() {
+		return state;
+	}
+
+	public void setState(String state) {
+		this.state = state;
+	}
+
 	public String getOrderId() {
 		return orderId;
 	}

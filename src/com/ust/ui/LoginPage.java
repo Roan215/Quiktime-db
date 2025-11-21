@@ -1,9 +1,8 @@
 package com.ust.ui;
 
 import javax.swing.*;
-
 import com.ust.util.DbConnection;
-
+import com.ust.util.SessionManager;
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.*;
@@ -50,16 +49,16 @@ public class LoginPage extends JFrame {
                 String password = new String(passwordField.getPassword());
                 
                 // Authenticate user (check if Admin or Customer)
-                String userType = authenticateUser(username, password);
+                String[] userInfo = authenticateUser(username, password);
                 
-                if ("admin".equals(userType)) {
+                if ("admin".equals(userInfo[0])) {
                     statusLabel.setText("Login successful as Admin!");
-                    // Redirect to Admin UI
+                    SessionManager.setCurrentUser(username, "admin", userInfo[1]);
                     new AdminUI().setVisible(true);
                     LoginPage.this.setVisible(false); // Close login page
-                } else if ("customer".equals(userType)) {
+                } else if ("customer".equals(userInfo[0])) {
                     statusLabel.setText("Login successful as Customer!");
-                    // Redirect to Customer UI
+                    SessionManager.setCurrentUser(username, "customer", userInfo[1]);
                     new CustomerUI().setVisible(true);
                     LoginPage.this.setVisible(false); // Close login page
                 } else {
@@ -78,29 +77,31 @@ public class LoginPage extends JFrame {
         });
     }
 
-    // Method to authenticate the user by checking credentials
-    private String authenticateUser(String username, String password) {
+    // Updated method to authenticate the user and return user info
+    private String[] authenticateUser(String username, String password) {
         try (Connection conn = DbConnection.getCon()) {
-            String sql = "SELECT * FROM credentials WHERE userId = ? AND Password = ?";
+            String sql = "SELECT c.userId, c.usertype, p.firstName FROM credentials c " +
+                        "JOIN profiles p ON c.userId = p.userId " +
+                        "WHERE c.userId = ? AND c.Password = ?";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, username);
                 stmt.setString(2, password);
                 
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
-                    // Check user type (Admin or Customer)
                     String userType = rs.getString("usertype");
+                    String firstName = rs.getString("firstName");
                     if ("A".equals(userType)) {
-                        return "admin"; // Admin user
+                        return new String[]{"admin", firstName};
                     } else if ("C".equals(userType)) {
-                        return "customer"; // Customer user
+                        return new String[]{"customer", firstName};
                     }
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return "invalid"; // Invalid login credentials
+        return new String[]{"invalid", ""};
     }
 
     public static void main(String[] args) {
